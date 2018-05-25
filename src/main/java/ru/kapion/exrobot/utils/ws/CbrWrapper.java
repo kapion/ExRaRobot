@@ -1,10 +1,8 @@
 package ru.kapion.exrobot.utils.ws;
 
 import org.springframework.stereotype.Component;
-import ru.cbr.DailyInfo;
-import ru.cbr.DailyInfoSoap;
-import ru.cbr.EnumValutesResponse;
-import ru.cbr.GetCursOnDateResponse;
+import ru.cbr.*;
+import ru.cbr.custom_model.DynValuteData;
 import ru.cbr.custom_model.EnumValuteData;
 import ru.cbr.custom_model.ValuteData;
 import ru.kapion.exrobot.util.DateHelper;
@@ -50,4 +48,11 @@ public class CbrWrapper {
         return  result.getAny().getRows();
     }
 
+    public List<DynValuteData.ValuteCursDynamic> getListDynValutes(LocalDate from, LocalDate to, String code) throws DatatypeConfigurationException {
+        GetCursDynamicResponse.GetCursDynamicResult result =
+                getPort().getCursDynamic(DateHelper.convertLocalDateToXMLGregorianCalendar(from),
+                                         DateHelper.convertLocalDateToXMLGregorianCalendar(to),
+                                         code);
+        return  result.getAny().getRows();
+    }
 }

@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
+import ru.cbr.custom_model.DynValuteData;
 import ru.cbr.custom_model.EnumValuteData;
 import ru.cbr.custom_model.ValuteData;
 import ru.kapion.exrobot.models.ExchangeRates;
@@ -128,4 +129,15 @@ public class ExchangeRatesService {
         return enumValutesList;
     }
 
+    public List<DynValuteData.ValuteCursDynamic> getDynValuteCurs(LocalDate from, LocalDate to, String code) throws DatatypeConfigurationException {
+        return cbrWrapper.getListDynValutes(from, to, code);
+    }
+
+    public String getVcommonCodeFromVchCode(String chCode) {
+        return getEnumValutes()
+                .stream()
+                .filter(p -> p.getCharCode().equals(chCode))
+                .map(EnumValuteData.EnumValutes::getCommonCode)
+                .findFirst().get();
+    }
 }

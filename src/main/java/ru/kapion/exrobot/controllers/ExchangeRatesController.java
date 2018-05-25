@@ -11,6 +11,7 @@ import ru.kapion.exrobot.services.ExchangeRatesService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -43,28 +44,50 @@ public class ExchangeRatesController {
     public List<EnumValuteData.EnumValutes> getRaw() {
         return service.getEnumValutes();
     }
+    ///valutes/dyn?from=2018-05-23&to=2018-05-25&code=USD
+    @GetMapping("/valutes/dyn")
+    public List<?> getDynamicCurs(
+            @RequestParam("from") String from,
+            @RequestParam("to") String to,
+            @RequestParam("code") String  chCode) {
+        String error = null;
+        try {
+            LocalDate dateFrom = LocalDate.parse(from);
+            LocalDate dateTo = LocalDate.parse(to);
+            String code = service.getVcommonCodeFromVchCode(chCode);
+            return service.getDynValuteCurs(dateFrom, dateTo, code);
+        }catch (Exception e) {
+            error = e.getMessage();
+        }
+        return Arrays.asList(error);
+    }
 
-
+    //valutes/2018/05/24?list=UAH,USD
     @GetMapping("/valutes/{year}/{month}/{day}")
-    public List<ExchangeRates> getValutes(
+    public List<?> getValutes(
             @PathVariable("year") String year,
             @PathVariable("month") String month,
             @PathVariable("day") String day,
             @RequestParam("list") String valutes ) {
+        String error = null;
+        try {
+            LocalDate date = LocalDate.of(Integer.valueOf(year), Integer.valueOf(month), Integer.valueOf(day));
 
-        LocalDate date = LocalDate.of(Integer.valueOf(year), Integer.valueOf(month), Integer.valueOf(day));
-
-        List<ExchangeRates> result = service.getListRatesByDate(date, true);
-        //фильтруем список
-        if (valutes!=null && !valutes.isEmpty()){
-            List<ExchangeRates> newResult = new ArrayList<>();
-            result.forEach(r->{
-                if (valutes.contains(r.getChCode())) {
-                    newResult.add(r);
-                }
-            });
-            result = newResult;
+            List<ExchangeRates> result = service.getListRatesByDate(date, true);
+            //фильтруем список
+            if (valutes!=null && !valutes.isEmpty()){
+                List<ExchangeRates> newResult = new ArrayList<>();
+                result.forEach(r->{
+                    if (valutes.contains(r.getChCode())) {
+                        newResult.add(r);
+                    }
+                });
+                result = newResult;
+            }
+            return result;
+        }catch (Exception e) {
+            error = e.getMessage();
         }
-        return result;
+        return Arrays.asList(error);
     }
 }
