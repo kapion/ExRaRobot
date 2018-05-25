@@ -27,6 +27,11 @@ public class ExchangeRatesService {
 
     private @Value("${orderValutes}") String orderValutes;
 
+
+    public void clear() {
+        exchangeRatesRepository.deleteAll();
+    }
+
     public List<ExchangeRates> getAll() {
         return exchangeRatesRepository.findAll();
     }
@@ -140,4 +145,5 @@ public class ExchangeRatesService {
                 .map(EnumValuteData.EnumValutes::getCommonCode)
                 .findFirst().get();
     }
+
 }

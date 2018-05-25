@@ -1,10 +1,7 @@
 package ru.kapion.exrobot.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.cbr.custom_model.EnumValuteData;
 import ru.kapion.exrobot.models.ExchangeRates;
 import ru.kapion.exrobot.services.ExchangeRatesService;
@@ -14,38 +11,46 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@RestController
+@RestController()
+@RequestMapping("/valutes")
 public class ExchangeRatesController {
 
     @Autowired
     private ExchangeRatesService service;
 
-    @GetMapping("/all")
-    public List<ExchangeRates> getAll() {
-        return service.getAll();
-    }
-
-    @GetMapping("/now")
-    public List<ExchangeRates> getNow() {
-        return service.getListRatesByDate(LocalDate.now(),true);
-    }
-
-    @GetMapping("/fromdb")
-    public List<ExchangeRates> getFromDB() {
-        return service.getListRatesFromDB(LocalDate.now());
-    }
-
-    @GetMapping("/valutes")
+    @GetMapping //Запрос справочника валют
     public List<EnumValuteData.EnumValutes> getSortedValutes() {
         return service.getSortedEnumValutes();
     }
 
-    @GetMapping("/raw")
+    @GetMapping("/db/all") //Вывести все записи из БД
+    public List<ExchangeRates> getAll() {
+        return service.getAll();
+    }
+
+    @GetMapping("/now") //Обновить курсы немедленно и записть в БД
+    public List<ExchangeRates> getNow() {
+        return service.getListRatesByDate(LocalDate.now(),true);
+    }
+
+    @GetMapping("/db/now") //Посмотреть записи в БД на текущую дату
+    public List<ExchangeRates> getFromDB() {
+        return service.getListRatesFromDB(LocalDate.now());
+    }
+
+    @GetMapping("/db/clear") //Очистить таблицу с курсами валют
+    public String deleteAll() {
+        service.clear();
+        return "Clear complete";
+    }
+
+    @GetMapping("/enum")
     public List<EnumValuteData.EnumValutes> getRaw() {
         return service.getEnumValutes();
     }
+
     ///valutes/dyn?from=2018-05-23&to=2018-05-25&code=USD
-    @GetMapping("/valutes/dyn")
+    @GetMapping("/dyn") //Запрос динамики курсов валют
     public List<?> getDynamicCurs(
             @RequestParam("from") String from,
             @RequestParam("to") String to,
@@ -63,12 +68,12 @@ public class ExchangeRatesController {
     }
 
     //valutes/2018/05/24?list=UAH,USD
-    @GetMapping("/valutes/{year}/{month}/{day}")
+    @GetMapping("/{year}/{month}/{day}") //Запрос курсов перечня валют на заданную дату, с фильтрацией по валюьам
     public List<?> getValutes(
             @PathVariable("year") String year,
             @PathVariable("month") String month,
             @PathVariable("day") String day,
-            @RequestParam("list") String valutes ) {
+            @RequestParam(name = "list", required = false) String valutes ) {
         String error = null;
         try {
             LocalDate date = LocalDate.of(Integer.valueOf(year), Integer.valueOf(month), Integer.valueOf(day));
